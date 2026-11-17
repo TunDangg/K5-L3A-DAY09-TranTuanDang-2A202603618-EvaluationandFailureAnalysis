@@ -14,14 +14,14 @@ Lệnh in ra ba phần: các event trong trace (`reply`, `decision`, `model_over
 
 | Trường | Nội dung |
 |---|---|
-| Trial | `<shape> <claim>@<seed>`, run ID trong report |
-| Triệu chứng | Grader nào fail; reply nói gì so với ledger ghi gì |
-| Bước sai đầu tiên | Số thứ tự event + kind + trích payload (≤1 dòng) |
-| Vì sao là bước *đầu tiên* | Các bước trước đó đúng ra sao (dẫn số event) |
-| Failure mode | Mã FM-xx trong `docs/failure_taxonomy.md` |
-| Đối chứng | Cùng claim@seed trên shape `fixed`: bước đó khác thế nào |
-| Regression test | Tên test + grader/assert nào bắt được; đã thấy fail trên variant lỗi và pass trên `fixed` chưa |
-| Chưa chắc chắn | Điều trace không chứng minh được |
+| Trial | `seeded_regression C-002@11`, run ID: `seeded_regression-C-002-11` |
+| Triệu chứng | Grader Lab 8 fail (`status resolved != denied`); ledger ghi `refund_vnd=20000` (nhãn = 0); reply thông báo đã hoàn 20.000đ |
+| Bước sai đầu tiên | Event 3: kind `model_override`, payload `{"delay_days": 5}` |
+| Vì sao là bước *đầu tiên* | Event 1 (`handoff`) và Event 2 (`investigator`) thực hiện đúng: DB trả về đơn hàng giao trễ 2 ngày (chưa đủ điều kiện hoàn). Event 3 tin ticket và đè giá trị thành 5 ngày |
+| Failure mode | `FM-03` (ticket_trust — tin ticket hơn DB) |
+| Đối chứng | Cùng claim@seed trên shape `fixed`: Không có event `model_override`; Event 3 chuyển thẳng sang `quote` với `amount_vnd=0`, đơn bị `denied`, ledger hoàn 0đ |
+| Regression test | `test_override_event_breaks_db_fact` trong `tests/test_lab9_graders.py` (grader `DbFactKept`); kiểm tra fail trên `seeded_regression` và pass trên `fixed` |
+| Chưa chắc chắn | Trace không hiển thị prompt nội bộ xem LLM có phát hiện sự mâu thuẫn giữa DB và ticket không, chỉ thấy kết quả cuối cùng là ghi nhận event override |
 
 ## Quy tắc
 
